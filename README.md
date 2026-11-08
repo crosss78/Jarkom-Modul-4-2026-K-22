@@ -10,7 +10,7 @@
 
 **Kelompok:** K22\
 **Prefix IP:** `192.222.x.x`\
-**Daftar Isi**\
+**Daftar Isi**
 
 - [1. Ketentuan Soal](#1-ketentuan-soal)
 - [2. Topologi GNS3](#2-topologi-gns3)
@@ -18,7 +18,7 @@
 - [4. Perhitungan CIDR](#4-perhitungan-cidr)
 - [5. Konfigurasi pada GNS3](#5-konfigurasi-pada-gns3)
 - [6. Routing Statis dengan Rute Agregat](#6-routing-statis-dengan-rute-agregat)
-- [7. Pengujian](#7-pengujian)
+- [7. Pengujian CIDR](#7-pengujian-cidr)
 
 ------------------------------------------------------------------------
 
@@ -739,7 +739,7 @@ Routing pada GNS3 menggunakan rute statis yang memanfaatkan hasil penggabungan C
 
 ------------------------------------------------------------------------
 
-## 7. Pengujian
+## 7. Pengujian CIDR
 
 ### 7.1. Alamat Interface Cyberia
 
