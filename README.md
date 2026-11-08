@@ -905,36 +905,6 @@ Hasil yang diharapkan (alamat setiap hop adalah interface router yang dilalui):
 
 ![Gambar 7.10 Traceroute dari Lain ke JJ](assets/7-traceroute-lain-jj.png)
 
-### 7.8. Pemilihan Rute Agregat
-
-Perintah `ip route get` menunjukkan rute yang dipilih router untuk suatu tujuan. Alamat Mika (`192.222.12.67`) dipilih karena berada di lapisan terdalam:
-
-| Router | Perintah | Hasil yang diharapkan |
-|---|---|---|
-| Cyberia | `ip route get 192.222.12.67` | `192.222.12.67 via 192.222.4.146 dev eth2 src 192.222.4.145` |
-| Wired | `ip route get 192.222.12.67` | `192.222.12.67 via 192.222.4.134 dev eth3 src 192.222.4.133` |
-| Tachibana | `ip route get 192.222.12.67` | `192.222.12.67 via 192.222.10.2 dev eth2 src 192.222.10.1` |
-| Phantoma | `ip route get 192.222.12.67` | `192.222.12.67 via 192.222.12.34 dev eth2 src 192.222.12.33` |
-
-Tujuan yang sama diteruskan melalui rute agregat yang semakin spesifik di setiap router, sampai tiba di Phantoma yang memiliki rute `192.222.12.64/26` menuju Shibuya.
-
-**Gambar 7.11 --- Hasil ip route get pada beberapa router**
-
-![Gambar 7.11 Hasil ip route get pada beberapa router](assets/7-ip-route-get.png)
-
-### 7.9. Akses Internet melalui NAT
-
-``` bash
-ping -c 3 8.8.8.8
-```
-
-**Gambar 7.12 --- Ping ke internet dari Lain**
-
-![Gambar 7.12 Ping ke internet dari Lain](assets/7-ping-internet.png)
-
-------------------------------------------------------------------------
-
-
 ------------------------------------------------------------------------
 
 ## 8. Implementasi VLSM pada Cisco Packet Tracer
