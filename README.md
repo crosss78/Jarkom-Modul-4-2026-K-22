@@ -292,7 +292,7 @@ Versi SVG: [assets/pohon-cidr.svg](assets/pohon-cidr.svg)
 
 Untuk memperlihatkan hasil penggabungan pada topologi, kami juga melingkari setiap subnet dan blok gabungan langsung di atas topologi GNS3. Gambar ringkasan memuat seluruh lingkaran sekaligus, sedangkan gambar per tahap memperlihatkan satu tahap penggabungan dengan garis tebal sebagai hasil gabungan dan garis tipis sebagai subnet yang digabung.
 
-**Gambar 4.2 --- Topologi GNS3 dengan lingkaran seluruh subnet dan blok gabungan**
+**Gambar 4.2 --- Topologi GNS3 dengan lingkaran seluruh subnet dan blok gabungan (CIDR)**
 
 ![Gambar 4.2 Topologi GNS3 dengan lingkaran seluruh subnet dan blok gabungan](assets/cidr-topologi-bulat.png)
 
@@ -394,6 +394,7 @@ auto eth0
 iface eth0 inet dhcp
     up sysctl -w net.ipv4.ip_forward=1
     up iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+    ifdown eth0; ifup eth0
 
 auto eth1
 iface eth1 inet static
