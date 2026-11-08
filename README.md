@@ -19,6 +19,7 @@
 - [5. Konfigurasi pada GNS3](#5-konfigurasi-pada-gns3)
 - [6. Routing Statis dengan Rute Agregat](#6-routing-statis-dengan-rute-agregat)
 - [7. Pengujian CIDR](#7-pengujian-cidr)
+- [8. Implementasi VLSM pada Cisco Packet Tracer](#8-implementasi-vlsm-pada-cisco-packet-tracer)
 
 ------------------------------------------------------------------------
 
@@ -43,9 +44,13 @@ Pada bagian ini, topologi dikerjakan di **GNS3** menggunakan metode **CIDR** den
 | Berkas | Keterangan |
 |---|---|
 | [K-22-MODUL-4.gns3project](GNS3/K-22-MODUL-4.gns3project) | Project GNS3 yang didemokan |
-| [Sps_k22.xlsx](VLSM/Sps_k22.xlsx) | Spreadsheet perhitungan; bagian CIDR berada pada sheet *Rute*, *Penggabungan - CIDR*, dan *Pembagian IP - CIDR* |
-| [assets/pohon-cidr.png](assets/pohon-cidr.png) | Gambar pohon pembagian IP CIDR |
-| [GNS3/config](GNS3/config) | Salinan `/etc/network/interfaces` setiap node |
+| [VLSM_CPT_K22.pkt](CiscoPacketTracer/VLSM_CPT_K22.pkt) | File simulasi Cisco Packet Tracer dengan pembagian alamat IP VLSM |
+| [Sps_k22.xlsx](VLSM/Sps_k22.xlsx) | Spreadsheet perhitungan; bagian CIDR berada pada sheet *Rute*, *Penggabungan - CIDR*, dan *Pembagian IP - CIDR*, sedangkan VLSM berada pada sheet *Rute*, *Pembagian IP - VLSM*, *Detail VLSM*, dan *Tree VLSM* |
+| [assets/pohon-cidr.png](assets/pohon-cidr.png) | Gambar pohon pembagian IP CIDR untuk GNS3 |
+| [GNS3/config](GNS3/config) | Salinan `/etc/network/interfaces` setiap node GNS3 |
+| `assets/8-*.png` | Screenshot topologi, hasil perhitungan, konfigurasi, dan pengujian Cisco Packet Tracer |
+
+Bagian GNS3 menggunakan **CIDR** dengan routing statis, sedangkan bagian Cisco Packet Tracer menggunakan **VLSM**. Hasil dan dokumentasi kedua aplikasi dibahas pada bagian yang terpisah agar pembagian alamat IP tidak tertukar.
 
 ### 1.1. Glosarium Entitas
 
@@ -926,5 +931,197 @@ ping -c 3 8.8.8.8
 **Gambar 7.12 --- Ping ke internet dari Lain**
 
 ![Gambar 7.12 Ping ke internet dari Lain](assets/7-ping-internet.png)
+
+------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------
+
+## 8. Implementasi VLSM pada Cisco Packet Tracer
+
+Bagian Cisco Packet Tracer dikerjakan menggunakan metode **Variable Length Subnet Mask (VLSM)**. Berbeda dengan bagian GNS3 yang menggunakan CIDR, pada Cisco Packet Tracer setiap subnet dialokasikan berdasarkan kebutuhan alamat IP masing-masing segmen. Perhitungan mengikuti kebutuhan host dan interface router pada topologi, sebagaimana dirangkum pada Bagian 3.
+
+Berkas simulasi yang digunakan adalah [CiscoPacketTracer/VLSM_CPT_K22.pkt](CiscoPacketTracer/VLSM_CPT_K22.pkt), sedangkan data perhitungan terdapat pada workbook [VLSM/Sps_k22.xlsx](VLSM/Sps_k22.xlsx).
+
+### 8.1. Topologi Cisco Packet Tracer
+
+Topologi Cisco Packet Tracer memuat Cloud yang terhubung ke router Cyberia. Dari Cyberia, jaringan terhubung ke Wired dan selanjutnya bercabang menuju Navi, Tachibana, Psyche, Copland, Schumann, serta router-router pada lapisan berikutnya. Topologi juga mencakup switch dan perangkat akhir sesuai jumlah host pada soal.
+
+**Gambar 8.1 --- Topologi jaringan Cisco Packet Tracer**
+
+![Gambar 8.1 Topologi jaringan Cisco Packet Tracer](assets/8-topologi-cisco-packet-tracer.png)
+
+### 8.2. Ringkasan Perhitungan VLSM
+
+Berdasarkan workbook kelompok K-22, blok induk yang digunakan pada Cisco Packet Tracer adalah `192.222.0.0/19` dengan subnet mask `255.255.224.0`.
+
+| Parameter | Hasil |
+|---|---:|
+| Prefix induk | `192.222.0.0/19` |
+| Subnet mask induk | `255.255.224.0` |
+| Total alamat pada blok induk | 8.192 alamat |
+| Jumlah subnet | 25 subnet (A1–A25) |
+| Total kebutuhan IP | 2.814 alamat |
+| Total ukuran blok subnet | 4.188 alamat |
+| Kapasitas host usable seluruh subnet | 4.138 alamat |
+| Sisa kapasitas usable | 1.324 alamat |
+| Sisa blok di luar subnet yang dialokasikan | 4.004 alamat |
+
+Prefix `/20` menyediakan 4.096 alamat sehingga belum cukup untuk menampung total ukuran blok subnet sebesar 4.188 alamat. Oleh karena itu, prefix induk minimum yang digunakan adalah `/19`, yang menyediakan 8.192 alamat.
+
+**Gambar 8.2 --- Ringkasan detail perhitungan VLSM K-22**
+
+![Gambar 8.2 Ringkasan detail perhitungan VLSM K-22](assets/8-ringkasan-perhitungan-vlsm.png)
+
+### 8.3. Hasil Pembagian IP VLSM
+
+Pembagian IP menghasilkan 25 subnet, yaitu A1 sampai A25. Jumlah IP pada tabel merupakan kebutuhan alamat host dan interface router pada subnet terkait. Network ID dan broadcast dihitung sebagai dua alamat tambahan pada setiap blok subnet.
+
+| Subnet | Rute | Jumlah IP | Prefix | Network ID | Netmask | Broadcast | Range IP |
+|---|---|---:|---:|---|---|---|---|
+| A1 | Cyberia &gt; Switch1 &gt; JJ, MyuMyu | 126 | `/25` | `192.222.14.0` | `255.255.255.128` | `192.222.14.127` | `192.222.14.1 - 192.222.14.126` |
+| A2 | Cyberia &gt; Wired | 2 | `/30` | `192.222.16.56` | `255.255.255.252` | `192.222.16.59` | `192.222.16.57 - 192.222.16.58` |
+| A3 | Wired &gt; Navi | 2 | `/30` | `192.222.16.64` | `255.255.255.252` | `192.222.16.67` | `192.222.16.65 - 192.222.16.66` |
+| A4 | Wired &gt; Tachibana | 2 | `/30` | `192.222.16.68` | `255.255.255.252` | `192.222.16.71` | `192.222.16.69 - 192.222.16.70` |
+| A5 | Wired &gt; Switch2 &gt; Psyche, Copland, Schumann | 4 | `/29` | `192.222.16.40` | `255.255.255.248` | `192.222.16.47` | `192.222.16.41 - 192.222.16.46` |
+| A6 | Psyche &gt; Switch3 &gt; Karl, Lin | 881 | `/22` | `192.222.0.0` | `255.255.252.0` | `192.222.3.255` | `192.222.0.1 - 192.222.3.254` |
+| A7 | Copland &gt; Juri | 32 | `/26` | `192.222.15.192` | `255.255.255.192` | `192.222.15.255` | `192.222.15.193 - 192.222.15.254` |
+| A8 | Copland &gt; Switch4 &gt; Masayuki | 301 | `/23` | `192.222.8.0` | `255.255.254.0` | `192.222.9.255` | `192.222.8.1 - 192.222.9.254` |
+| A9 | Schumann &gt; Akashic | 4 | `/29` | `192.222.16.32` | `255.255.255.248` | `192.222.16.39` | `192.222.16.33 - 192.222.16.38` |
+| A10 | Schumann &gt; Accela | 2 | `/30` | `192.222.16.60` | `255.255.255.252` | `192.222.16.63` | `192.222.16.61 - 192.222.16.62` |
+| A11 | Accela &gt; Switch5 &gt; Omnipresence, Denpa | 514 | `/22` | `192.222.4.0` | `255.255.252.0` | `192.222.7.255` | `192.222.4.1 - 192.222.7.254` |
+| A12 | Navi &gt; Switch6 &gt; Alice, Reika | 254 | `/24` | `192.222.12.0` | `255.255.255.0` | `192.222.12.255` | `192.222.12.1 - 192.222.12.254` |
+| A13 | Navi &gt; Switch7 &gt; Taro | 58 | `/26` | `192.222.15.64` | `255.255.255.192` | `192.222.15.127` | `192.222.15.65 - 192.222.15.126` |
+| A14 | Navi &gt; Switch8 &gt; Yasuo, Miho, Kuma | 143 | `/24` | `192.222.13.0` | `255.255.255.0` | `192.222.13.255` | `192.222.13.1 - 192.222.13.254` |
+| A15 | Tachibana &gt; Switch9 &gt; Collective, Ghost | 267 | `/23` | `192.222.10.0` | `255.255.254.0` | `192.222.11.255` | `192.222.10.1 - 192.222.11.254` |
+| A16 | Tachibana &gt; Deus | 2 | `/30` | `192.222.16.72` | `255.255.255.252` | `192.222.16.75` | `192.222.16.73 - 192.222.16.74` |
+| A17 | Deus &gt; Switch10 &gt; Lilith, Specter | 99 | `/25` | `192.222.14.128` | `255.255.255.128` | `192.222.14.255` | `192.222.14.129 - 192.222.14.254` |
+| A18 | Deus &gt; Protocol7 | 2 | `/30` | `192.222.16.76` | `255.255.255.252` | `192.222.16.79` | `192.222.16.77 - 192.222.16.78` |
+| A19 | Protocol7 &gt; Switch11 &gt; Chisa, Hodgeson | 33 | `/26` | `192.222.15.128` | `255.255.255.192` | `192.222.15.191` | `192.222.15.129 - 192.222.15.190` |
+| A20 | Protocol7 &gt; Knights | 2 | `/30` | `192.222.16.80` | `255.255.255.252` | `192.222.16.83` | `192.222.16.81 - 192.222.16.82` |
+| A21 | Knights &gt; Eiri | 3 | `/29` | `192.222.16.48` | `255.255.255.248` | `192.222.16.55` | `192.222.16.49 - 192.222.16.54` |
+| A22 | Knights &gt; Phantoma | 2 | `/30` | `192.222.16.84` | `255.255.255.252` | `192.222.16.87` | `192.222.16.85 - 192.222.16.86` |
+| A23 | Phantoma &gt; Switch12 &gt; Semi | 15 | `/27` | `192.222.16.0` | `255.255.255.224` | `192.222.16.31` | `192.222.16.1 - 192.222.16.30` |
+| A24 | Phantoma &gt; Shibuya | 2 | `/30` | `192.222.16.88` | `255.255.255.252` | `192.222.16.91` | `192.222.16.89 - 192.222.16.90` |
+| A25 | Shibuya &gt; Switch13 &gt; Lain, Mika | 62 | `/26` | `192.222.15.0` | `255.255.255.192` | `192.222.15.63` | `192.222.15.1 - 192.222.15.62` |
+
+**Gambar 8.3 --- Tabel hasil pembagian IP VLSM**
+
+![Gambar 8.3 Tabel hasil pembagian IP VLSM](assets/8-tabel-alokasi-vlsm.png)
+
+### 8.4. Pohon Pembagian IP VLSM
+
+Pohon pembagian IP menunjukkan struktur alokasi blok induk `192.222.0.0/19` menjadi dua cabang utama:
+
+- **Cabang 1:** `192.222.0.0/20`
+- **Cabang 2:** `192.222.16.0/20`
+
+Masing-masing cabang kemudian memuat subnet sesuai hasil perhitungan VLSM pada workbook.
+
+**Gambar 8.4 --- Pohon pembagian IP VLSM K-22**
+
+![Gambar 8.4 Pohon pembagian IP VLSM K-22](assets/8-pohon-pembagian-ip-vlsm.png)
+
+### 8.5. Konfigurasi dan Pengujian pada Cisco Packet Tracer
+
+#### 8.5.1. Pemeriksaan Interface Router Cyberia
+
+Pemeriksaan interface dilakukan melalui CLI router Cyberia menggunakan perintah:
+
+```text
+enable
+show ip interface brief
+```
+
+Berdasarkan hasil yang didokumentasikan, interface Cyberia memiliki konfigurasi berikut:
+
+| Interface | IP Address | Status | Protocol |
+|---|---|---|---|
+| FastEthernet0/0 | `192.222.14.1` | up | up |
+| FastEthernet0/1 | `192.222.16.57` | up | up |
+| FastEthernet1/0 | unassigned | up | up |
+| FastEthernet1/1 | unassigned | down | down |
+| Vlan1 | unassigned | administratively down | down |
+
+FastEthernet0/0 menggunakan alamat pertama yang dapat digunakan pada subnet A1 (`192.222.14.0/25`), sedangkan FastEthernet0/1 menggunakan alamat pertama yang dapat digunakan pada subnet A2 (`192.222.16.56/30`).
+
+**Gambar 8.5 --- Hasil `show ip interface brief` pada router Cyberia**
+
+![Gambar 8.5 Hasil show ip interface brief pada router Cyberia](assets/8-interface-cyberia.png)
+
+#### 8.5.2. Pemeriksaan Tabel Routing Router Cyberia
+
+Tabel routing diperiksa melalui CLI menggunakan perintah:
+
+```text
+show ip route
+```
+
+Pada hasil yang didokumentasikan, kode `R` menunjukkan rute yang dipelajari melalui RIP, sedangkan kode `C` menunjukkan jaringan yang terhubung langsung (*directly connected*) dan `L` menunjukkan alamat lokal interface router.
+
+Beberapa rute yang terlihat pada tabel routing Cyberia adalah:
+
+| Network tujuan | Jenis rute | Next hop |
+|---|---|---|
+| `192.222.0.0/22` | RIP | `192.222.16.58` |
+| `192.222.4.0/22` | RIP | `192.222.16.58` |
+| `192.222.8.0/23` | RIP | `192.222.16.58` |
+| `192.222.10.0/23` | RIP | `192.222.16.58` |
+| `192.222.12.0/24` | RIP | `192.222.16.58` |
+| `192.222.13.0/24` | RIP | `192.222.16.58` |
+| `192.222.14.0/25` | Connected | — |
+| `192.222.14.128/25` | RIP | `192.222.16.58` |
+| `192.222.15.0/26` | RIP | `192.222.16.58` |
+| `192.222.15.64/26` | RIP | `192.222.16.58` |
+| `192.222.15.128/26` | RIP | `192.222.16.58` |
+
+Output pada screenshot juga menampilkan keterangan `Gateway of last resort is not set`. Tabel di atas merangkum rute yang terlihat pada screenshot, bukan keseluruhan kemungkinan rute pada semua router.
+
+**Gambar 8.6 --- Hasil `show ip route` pada router Cyberia**
+
+![Gambar 8.6 Hasil show ip route pada router Cyberia](assets/8-routing-table-cyberia.png)
+
+#### 8.5.3. Konfigurasi IP Perangkat Akhir Yasuo
+
+Konfigurasi alamat IP perangkat akhir Yasuo dilakukan melalui menu **Desktop → IP Configuration**. Parameter IPv4 yang terlihat pada hasil konfigurasi adalah:
+
+| Parameter | Nilai |
+|---|---|
+| IPv4 Address | `192.222.13.2` |
+| Subnet Mask | `255.255.255.0` |
+| Default Gateway | `192.222.13.1` |
+| DNS Server | `0.0.0.0` |
+
+Alamat tersebut berada pada subnet A14 dengan Network ID `192.222.13.0/24`. Default gateway menggunakan alamat interface router pada subnet yang sama.
+
+**Gambar 8.7 --- Konfigurasi IP pada PC Yasuo**
+
+![Gambar 8.7 Konfigurasi IP pada PC Yasuo](assets/8-ip-configuration-yasuo.png)
+
+#### 8.5.4. Pengujian Konektivitas Menggunakan Ping
+
+Pengujian konektivitas dilakukan dari PC Yasuo menuju alamat IP `192.222.15.1` menggunakan Command Prompt pada Cisco Packet Tracer:
+
+```text
+ping 192.222.15.1
+```
+
+Berdasarkan hasil pengujian yang didokumentasikan, diperoleh hasil sebagai berikut:
+
+| Parameter | Hasil |
+|---|---:|
+| Paket terkirim | 4 |
+| Paket diterima | 4 |
+| Paket hilang | 0 |
+| Packet loss | 0% |
+| Minimum | 0 ms |
+| Maximum | 13 ms |
+| Average | 3 ms |
+
+Hasil tersebut menunjukkan bahwa pengujian ping dari Yasuo menuju `192.222.15.1` berhasil. Pengujian ini membuktikan konektivitas untuk pasangan sumber dan tujuan tersebut; pengujian ini sendiri belum menjadi bukti bahwa seluruh node pada topologi telah berhasil saling melakukan ping.
+
+**Gambar 8.8 --- Hasil ping dari Yasuo menuju 192.222.15.1**
+
+![Gambar 8.8 Hasil ping dari Yasuo menuju 192.222.15.1](assets/8-ping-test-yasuo.png)
 
 ------------------------------------------------------------------------
