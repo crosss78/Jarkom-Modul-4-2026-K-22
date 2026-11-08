@@ -1,0 +1,5 @@
+auto eth0
+iface eth0 inet static
+    address 192.222.20.2
+    netmask 255.255.254.0
+    gateway 192.222.20.1
